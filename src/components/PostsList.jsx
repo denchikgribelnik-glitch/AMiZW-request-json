@@ -2,11 +2,13 @@ import { useEffect, useState } from "react";
 import "./PostsList.css";
 
 function PostsList() {
-    const posts = []; // TODO: zamień na stan
-    const loading = false; // TODO: zamień na stan
-    const error = ""; // TODO: zamień na stan
-
+    const [posts, setposts]=useState([]);
+    const [loading,setloading]=useState(false);
+    const [error,seterror]=useState("");
     const fetchPosts = async () => {
+        setloading(true);
+        seterror("");
+
         // TODO:
         // Ustaw loading na true
 
@@ -14,6 +16,17 @@ function PostsList() {
         // Wyczyść poprzedni błąd
 
         try {
+            const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+            if(response.ok){
+                throw new ERROR("nie udalo sie pobrac z aplikacji dannych")
+                }
+                const data = await response.json ();
+                const parsedpost = data.slice(0,10).nap((post) => ({
+                    id : post.id,
+                    title : post.title,
+                    body : post.body
+                })) ;
+                setposts(parsedpost);
             // TODO:
             // Pobierz dane z API:
             // https://jsonplaceholder.typicode.com/posts
@@ -27,15 +40,20 @@ function PostsList() {
             // TODO:
             // Zapisz tylko 10 pierwszych postów do stanu
         } catch (err) {
+            seterror(error.message);
+            setposts([]);
             // TODO:
             // Zapisz błąd do stanu
         } finally {
+            setloading(false);
             // TODO:
             // Zakończ loading
         }
     };
 
     useEffect(() => {
+        fetchPosts();
+
         // TODO:
         // Wywołaj funkcję pobierającą dane po załadowaniu komponentu
     }, []);
@@ -49,15 +67,33 @@ function PostsList() {
                         <p>Pobieranie danych z API w React</p>
                     </div>
 
-                    <button className="reload-btn">
-                        Pobierz ponownie
+                    <button onClick={fetchPosts} disabled={loading} className="reload-btn">
+                        {loading ?"pobierania...":"pobierz ponownie"}
                     </button>
                 </div>
 
                 {loading && (
                     <p className="info-message">Ładowanie danych...</p>
                 )}
+                {error && (
+                    <p>style={{color:"red"}}
+                    blad: {error}
+                    </p>
+                )}
+                {!loading && !error && post.lenght === 0 && (
+                    <p>brak postow do wyswietlenia </p>
+                )}
+                {!loading && !error && post.lenght > 0 && (
+                    <div>
+                        {posts.map((post) => (
+                            <article key={post.id}>
+                                <h3>{post.title} </h3>
+                                <p>{post.body}</p>
+                            </article>
+                        ))}
+                    </div>
 
+                )}
                 {/* TODO:
             Wyświetl komunikat błędu, jeśli wystąpił */}
 
